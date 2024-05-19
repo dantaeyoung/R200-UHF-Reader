@@ -1,6 +1,6 @@
 # R200-UHF-Reader
 
-Library for Arduino/ESP32 communication for a R200 UHF reader.
+Library for Arduino/ESP32 communication for the Invelion R200 UHF RFID reader/writer.
 
 ### Context
 
