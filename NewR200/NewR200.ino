@@ -17,6 +17,7 @@ uint8_t targetepc[12] = {0xE2, 0x00, 0x00, 0x17, 0x57, 0x0D, 0x01, 0x23, 0x06, 0
 unsigned int freq = 220;
 
 unsigned long tagLastSeen = millis();
+unsigned long lastMultiplePollMessage = millis();
 
 
 void setup() {
@@ -91,6 +92,12 @@ void loop() {
 
     // Delay before the next loop iteration
     delay(10);
+
+    if(millis() - lastMultiplePollMessage > 10000) {
+      lastMultiplePollMessage = millis();
+      rfidReader.initiateMultiplePolling(10000);
+      Serial.println("initiating multiple polling");
+    }
 }
 
 
