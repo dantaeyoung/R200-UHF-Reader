@@ -11,5 +11,6 @@ This [YouTube video](https://www.youtube.com/watch?v=f9FDgGtX9tk) of the hardwar
 ### RFIDR200_Library
 
 The `RFIDR200_Library/` folder contains an Arduino/ESP32 sketch. Tested on an ESP32. 
+
 **WARNING** - this library was written with the judicious help with ChatGPT... so some of the functions have not fully been tested! 😅
  
