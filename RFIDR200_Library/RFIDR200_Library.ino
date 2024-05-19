@@ -1,31 +1,29 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
-#include "R200.h"
+#include "RFIDR200.h"
 
 
 
-// Create SoftwareSerial object on pins 10 (RX) and 11 (TX)
+// Create SoftwareSerial object on pins 33 (RX) and 32 (TX)
 SoftwareSerial mySerial(33, 32);
-R200 rfidReader(mySerial, 115200);
+RFIDR200 rfidReader(mySerial, 115200);
 
 uint8_t targetepc[12] = {0xE2, 0x00, 0x00, 0x17, 0x57, 0x0D, 0x01, 0x23, 0x06, 0x30, 0xD6, 0x8E};
                 
-
-unsigned int freq = 220;
 
 unsigned long tagLastSeen = millis();
 unsigned long lastMultiplePollMessage = millis();
 
 
 void setup() {
-    // Begin serial communication with the R200 module
+    // Begin serial communication with the RFIDR200 module
     Serial.begin(115200);
     Serial.println("Hello world.");
 
 
     rfidReader.begin();
 
-    Serial.print("Begin serial communication with the R200 module");
+    Serial.print("Begin serial communication with the RFIDR200 module");
     rfidReader.setTransmitPower(20);
 
     // Poll for tags

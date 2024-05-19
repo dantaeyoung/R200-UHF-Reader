@@ -1,14 +1,14 @@
-#ifndef R200_H
-#define R200_H
+#ifndef RFIDR200_H
+#define RFIDR200_H
 
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 
-class R200 {
+class RFIDR200 {
 public:
     // Constructors for HardwareSerial and SoftwareSerial
-    R200(HardwareSerial &serial, uint32_t baudRate);
-    R200(SoftwareSerial &serial, uint32_t baudRate);
+    RFIDR200(HardwareSerial &serial, uint32_t baudRate);
+    RFIDR200(SoftwareSerial &serial, uint32_t baudRate);
 
     void begin();
     void setTransmitPower(uint16_t power);
@@ -46,4 +46,4 @@ private:
     uint8_t calculateChecksum(uint8_t *command, size_t length);
 };
 
-#endif // R200_H
+#endif // RFIDR200_H

@@ -1,12 +1,12 @@
-#include "R200.h"
+#include "RFIDR200.h"
 
 // Constructor for HardwareSerial
-R200::R200(HardwareSerial &serial, uint32_t baudRate) : serial(serial), baudRate(baudRate), isHardwareSerial(true) {}
+RFIDR200::RFIDR200(HardwareSerial &serial, uint32_t baudRate) : serial(serial), baudRate(baudRate), isHardwareSerial(true) {}
 
 // Constructor for SoftwareSerial
-R200::R200(SoftwareSerial &serial, uint32_t baudRate) : serial(serial), baudRate(baudRate), isHardwareSerial(false) {}
+RFIDR200::RFIDR200(SoftwareSerial &serial, uint32_t baudRate) : serial(serial), baudRate(baudRate), isHardwareSerial(false) {}
 
-void R200::begin() {
+void RFIDR200::begin() {
     if (isHardwareSerial) {
         ((HardwareSerial&)serial).begin(baudRate);
     } else {
@@ -14,13 +14,13 @@ void R200::begin() {
     }
 }
 
-void R200::setTransmitPower(uint16_t power) {
+void RFIDR200::setTransmitPower(uint16_t power) {
     uint8_t command[] = {0xAA, 0x00, 0xB6, 0x00, 0x02, (power >> 8) & 0xFF, power & 0xFF, 0x00, 0xDD};
     command[7] = calculateChecksum(command, 7);
     sendCommand(command, sizeof(command));
 }
 
-void R200::readTagData(uint32_t accessPassword, uint8_t memBank, uint16_t address, uint16_t length, uint8_t *data) {
+void RFIDR200::readTagData(uint32_t accessPassword, uint8_t memBank, uint16_t address, uint16_t length, uint8_t *data) {
     uint8_t command[] = {
         0xAA, 0x00, 0x39, 0x00, 0x09, 
         (accessPassword >> 24) & 0xFF, (accessPassword >> 16) & 0xFF, 
@@ -35,7 +35,7 @@ void R200::readTagData(uint32_t accessPassword, uint8_t memBank, uint16_t addres
     getResponse(data, length * 2 + 10);
 }
 
-void R200::writeTagData(uint32_t accessPassword, uint8_t memBank, uint16_t address, uint16_t length, uint8_t *data) {
+void RFIDR200::writeTagData(uint32_t accessPassword, uint8_t memBank, uint16_t address, uint16_t length, uint8_t *data) {
     uint8_t command[18 + length * 2] = {
         0xAA, 0x00, 0x49, 0x00, static_cast<uint8_t>(9 + length * 2),
         (accessPassword >> 24) & 0xFF, (accessPassword >> 16) & 0xFF, 
@@ -52,12 +52,12 @@ void R200::writeTagData(uint32_t accessPassword, uint8_t memBank, uint16_t addre
     sendCommand(command, sizeof(command));
 }
 
-void R200::initiateSinglePolling() {
+void RFIDR200::initiateSinglePolling() {
     uint8_t command[] = {0xAA, 0x00, 0x22, 0x00, 0x00, 0x22, 0xDD};
     sendCommand(command, sizeof(command));
 }
 
-void R200::initiateMultiplePolling(uint16_t count) {
+void RFIDR200::initiateMultiplePolling(uint16_t count) {
     uint8_t command[] = {0xAA, 0x00, 0x27, 0x00, 0x03, 0x22, (count >> 8) & 0xFF, count & 0xFF, 0x00, 0xDD};
     command[8] = calculateChecksum(command, 8);
    for (int i = 0; i < 10; ++i) {
@@ -71,12 +71,12 @@ void R200::initiateMultiplePolling(uint16_t count) {
 
 }
 
-void R200::stopMultiplePolling() {
+void RFIDR200::stopMultiplePolling() {
     uint8_t command[] = {0xAA, 0x00, 0x28, 0x00, 0x00, 0x28, 0xDD};
     sendCommand(command, sizeof(command));
 }
 
-void R200::setSelectParameter(uint8_t target, uint8_t action, uint8_t memBank, uint32_t pointer, uint8_t maskLength, uint8_t *mask) {
+void RFIDR200::setSelectParameter(uint8_t target, uint8_t action, uint8_t memBank, uint32_t pointer, uint8_t maskLength, uint8_t *mask) {
     uint8_t command[22] = {
         0xAA, 0x00, 0x0C, 0x00, 0x13, 
         target, action, memBank, 
@@ -90,13 +90,13 @@ void R200::setSelectParameter(uint8_t target, uint8_t action, uint8_t memBank, u
     sendCommand(command, 16 + maskLength);
 }
 
-void R200::getSelectParameter(uint8_t *response, size_t length) {
+void RFIDR200::getSelectParameter(uint8_t *response, size_t length) {
     uint8_t command[] = {0xAA, 0x00, 0x0B, 0x00, 0x00, 0x0B, 0xDD};
     sendCommand(command, sizeof(command));
     getResponse(response, length);
 }
 
-void R200::killTag(uint32_t killPassword) {
+void RFIDR200::killTag(uint32_t killPassword) {
     uint8_t command[] = {
         0xAA, 0x00, 0x65, 0x00, 0x04, 
         (killPassword >> 24) & 0xFF, (killPassword >> 16) & 0xFF, 
@@ -107,7 +107,7 @@ void R200::killTag(uint32_t killPassword) {
     sendCommand(command, sizeof(command));
 }
 
-void R200::lockTag(uint32_t accessPassword, uint16_t lockPayload) {
+void RFIDR200::lockTag(uint32_t accessPassword, uint16_t lockPayload) {
     uint8_t command[] = {
         0xAA, 0x00, 0x82, 0x00, 0x07, 
         (accessPassword >> 24) & 0xFF, (accessPassword >> 16) & 0xFF, 
@@ -119,37 +119,37 @@ void R200::lockTag(uint32_t accessPassword, uint16_t lockPayload) {
     sendCommand(command, sizeof(command));
 }
 
-void R200::setWorkArea(uint8_t region) {
+void RFIDR200::setWorkArea(uint8_t region) {
     uint8_t command[] = {0xAA, 0x00, 0x07, 0x00, 0x01, region, 0x00, 0xDD};
     command[6] = calculateChecksum(command, 6);
     sendCommand(command, sizeof(command));
 }
 
-void R200::getWorkArea(uint8_t *response, size_t length) {
+void RFIDR200::getWorkArea(uint8_t *response, size_t length) {
     uint8_t command[] = {0xAA, 0x00, 0x08, 0x00, 0x00, 0x08, 0xDD};
     sendCommand(command, sizeof(command));
     getResponse(response, length);
 }
 
-void R200::setWorkingChannel(uint8_t channelIndex) {
+void RFIDR200::setWorkingChannel(uint8_t channelIndex) {
     uint8_t command[] = {0xAA, 0x00, 0xAB, 0x00, 0x01, channelIndex, 0x00, 0xDD};
     command[6] = calculateChecksum(command, 6);
     sendCommand(command, sizeof(command));
 }
 
-void R200::getWorkingChannel(uint8_t *response, size_t length) {
+void RFIDR200::getWorkingChannel(uint8_t *response, size_t length) {
     uint8_t command[] = {0xAA, 0x00, 0xAA, 0x00, 0x00, 0xAA, 0xDD};
     sendCommand(command, sizeof(command));
     getResponse(response, length);
 }
 
-void R200::setAutomaticFrequencyHopping(bool enable) {
+void RFIDR200::setAutomaticFrequencyHopping(bool enable) {
     uint8_t command[] = {0xAA, 0x00, 0xAD, 0x00, 0x01, enable ? 0xFF : 0x00, 0x00, 0xDD};
     command[6] = calculateChecksum(command, 6);
     sendCommand(command, sizeof(command));
 }
 
-void R200::insertWorkingChannel(uint8_t count, uint8_t *channelList) {
+void RFIDR200::insertWorkingChannel(uint8_t count, uint8_t *channelList) {
     uint8_t command[9 + count] = {0xAA, 0x00, 0xA9, 0x00, static_cast<uint8_t>(count + 1), count};
     memcpy(&command[6], channelList, count);
     command[6 + count] = calculateChecksum(command, 6 + count);
@@ -157,18 +157,18 @@ void R200::insertWorkingChannel(uint8_t count, uint8_t *channelList) {
     sendCommand(command, 8 + count);
 }
 
-void R200::moduleSleep() {
+void RFIDR200::moduleSleep() {
     uint8_t command[] = {0xAA, 0x00, 0x17, 0x00, 0x00, 0x17, 0xDD};
     sendCommand(command, sizeof(command));
 }
 
-void R200::moduleIdleMode(bool enable) {
+void RFIDR200::moduleIdleMode(bool enable) {
     uint8_t command[] = {0xAA, 0x00, 0x04, 0x00, 0x01, enable ? 0x01 : 0x00, 0x00, 0xDD};
     command[6] = calculateChecksum(command, 6);
     sendCommand(command, sizeof(command));
 }
 
-bool R200::getResponse(uint8_t *buffer, size_t length, uint32_t timeout) {
+bool RFIDR200::getResponse(uint8_t *buffer, size_t length, uint32_t timeout) {
     uint32_t startTime = millis();
     size_t bufferIndex = 0;
     int frameLength = -1;
@@ -199,7 +199,7 @@ bool R200::getResponse(uint8_t *buffer, size_t length, uint32_t timeout) {
 }
 
 
-bool R200::hasValidTag(uint8_t *response) {
+bool RFIDR200::hasValidTag(uint8_t *response) {
     if(response[2] == 0xFF) {
       int res = checkErrorCode(response[5]);
       return false;
@@ -208,7 +208,7 @@ bool R200::hasValidTag(uint8_t *response) {
 }
 
 
-int R200::checkErrorCode(uint8_t code) {
+int RFIDR200::checkErrorCode(uint8_t code) {
     // returns 0 for ok, 1 for tag nonexistent, 2 for error
     
     switch (code) {
@@ -266,7 +266,7 @@ int R200::checkErrorCode(uint8_t code) {
     
 }
 
-void R200::parseTagResponse(uint8_t* response, uint8_t& rssi, uint8_t (&epc)[12]) {
+void RFIDR200::parseTagResponse(uint8_t* response, uint8_t& rssi, uint8_t (&epc)[12]) {
     // Extract RSSI value at position 5
     rssi = response[5];
     
@@ -274,11 +274,11 @@ void R200::parseTagResponse(uint8_t* response, uint8_t& rssi, uint8_t (&epc)[12]
     memcpy(epc, &response[8], 12);
 }
 
-void R200::sendCommand(uint8_t *command, size_t length) {
+void RFIDR200::sendCommand(uint8_t *command, size_t length) {
     serial.write(command, length);
 }
 
-uint8_t R200::calculateChecksum(uint8_t *command, size_t length) {
+uint8_t RFIDR200::calculateChecksum(uint8_t *command, size_t length) {
     uint8_t checksum = 0;
     for (size_t i = 1; i < length; i++) {
         checksum += command[i];
