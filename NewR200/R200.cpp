@@ -60,7 +60,15 @@ void R200::initiateSinglePolling() {
 void R200::initiateMultiplePolling(uint16_t count) {
     uint8_t command[] = {0xAA, 0x00, 0x27, 0x00, 0x03, 0x22, (count >> 8) & 0xFF, count & 0xFF, 0x00, 0xDD};
     command[8] = calculateChecksum(command, 8);
+   for (int i = 0; i < 10; ++i) {
+        if (command[i] < 0x10) {
+          Serial.print("0");  // Pad single hex digit with leading zero
+        }     
+        Serial.print(command[i], HEX);
+        Serial.print(" ");
+    }
     sendCommand(command, sizeof(command));
+
 }
 
 void R200::stopMultiplePolling() {
@@ -272,8 +280,8 @@ void R200::sendCommand(uint8_t *command, size_t length) {
 
 uint8_t R200::calculateChecksum(uint8_t *command, size_t length) {
     uint8_t checksum = 0;
-    for (size_t i = 0; i < length; i++) {
+    for (size_t i = 1; i < length; i++) {
         checksum += command[i];
     }
-    return checksum;
+    return checksum & 0xFF;  // Return the least significant byte
 }
